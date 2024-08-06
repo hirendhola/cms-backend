@@ -75,3 +75,16 @@ exports.refreshToken = async (req, res) => {
     res.status(403).send({ error: 'Invalid refresh token' });
   }
 };
+
+
+exports.getInfo =  async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).send({ error: 'User not found' });
+    }
+    res.send(user);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
