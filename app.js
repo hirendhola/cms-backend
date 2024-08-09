@@ -5,6 +5,8 @@ const cookieParser = require('cookie-parser');
 const auth = require('./middleware/auth');
 const connectDB = require('./config/database');
 const authRoutes = require('./routes/auth');
+const adminAuthRoute = require('./routes/adminAuth');
+
 dotenv.config();
 
 const app = express();
@@ -15,7 +17,7 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth/admin', adminAuthRoute);
 
 
 app.get('/', (req, res) => {

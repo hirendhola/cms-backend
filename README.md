@@ -1,10 +1,9 @@
 # Frontend Guide: Accessing Our API
 
-This guide will help you connect to and use our backend API in your frontend application.
 
 ## API Endpoints
 
-Our API is located at `http://localhost:3001` (assuming you're running it locally). Here are the available endpoints:
+Our API is located at `https://cms-simple-login-3v27.vercel.app/`   Here are the available endpoints:
 
 ### Authentication
 
