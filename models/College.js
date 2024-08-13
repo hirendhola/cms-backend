@@ -10,7 +10,8 @@ const CollegeSchema = new mongoose.Schema({
   },
   collegeName: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   collegeCode: {
     type: String,

@@ -44,8 +44,8 @@ exports.signup = async (req, res) => {
     console.log("college updated with principal");
 
 
-    const accessToken = generateAccessToken({ adminId: admin._id });
-    const refreshToken = generateRefreshToken({ adminId: admin._id });
+    const accessToken = generateAccessToken({ adminId: admin._id, name, email });
+    const refreshToken = generateRefreshToken({ adminId: admin._id, name, email });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -102,8 +102,8 @@ exports.login = async (req, res) => {
       });
     }
 
-    const accessToken = generateAccessToken({ adminId: admin._id });
-    const refreshToken = generateRefreshToken({ adminId: admin._id });
+    const accessToken = generateAccessToken({ adminId: admin._id, name: admin.name, email: admin.email });
+    const refreshToken = generateRefreshToken({ adminId: admin._id, name: admin.name, email: admin.email });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,

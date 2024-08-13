@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const { College } = require('./College');
 const passwordHelper = require('../helpers/passwordHelper');
 
 // Admin Schema
@@ -16,7 +14,8 @@ const AdminSchema = new mongoose.Schema({
   },
   mobileNumber: {
     type: String,
-    required: true
+    required: true,
+    unique: true,
   },
   college: {
     type: mongoose.Schema.Types.ObjectId,

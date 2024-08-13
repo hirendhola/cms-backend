@@ -1,11 +1,12 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const auth = require('./middleware/auth');
 const connectDB = require('./config/database');
-const authRoutes = require('./routes/auth');
-const adminAuthRoute = require('./routes/adminAuth');
+const adminAuthRoute = require('./routes/adminAuth.router');
+const departmentRoute = require('./routes/department.router')
+const adminRoute = require('./routes/admin.router')
+const cors = require('cors');
 
 dotenv.config();
 
@@ -13,12 +14,15 @@ const app = express();
 
 // Connect to MongoDB
 connectDB();
+app.use(cors());
 
 app.use(express.json());
 app.use(cookieParser());
+
 // Routes
 app.use('/api/auth/admin', adminAuthRoute);
-
+app.use('/api/admin/department/', departmentRoute);
+app.use('/api/admin/', adminRoute);
 
 app.get('/', (req, res) => {
   return res.json({
@@ -30,6 +34,13 @@ app.get('/', (req, res) => {
 app.get('/api/protected', auth, (req, res) => {
   res.send('This is a protected route');
 });
+
+// undefined route
+app.use((req, res, next) => {
+  res.status(404).send({
+    message: "Oops! Looks like you got lost."
+  })
+})
 
 
 // Error handling middleware

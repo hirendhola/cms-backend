@@ -1,7 +1,3 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-
-// Student Schema
 const StudentSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -10,7 +6,8 @@ const StudentSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    index: true 
   },
   mobileNumber: {
     type: String,
@@ -23,30 +20,14 @@ const StudentSchema = new mongoose.Schema({
   accessCode: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    index: true 
   },
   enrollmentNumber: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    index: true // Adding an index here
   },
-  tenthMarks: {
-    type: Number,
-    required: true
-  },
-  twelfthMarks: {
-    type: Number,
-    required: true
-  },
-  course: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course',
-    required: true
-  }
+  // other fields...
 });
-
-passwordHelper.addPasswordFieldToSchema(AdminSchema);
-
-const Student = mongoose.model('Student', StudentSchema);
-
-module.exports = { Student };
