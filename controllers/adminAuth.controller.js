@@ -22,6 +22,14 @@ exports.signup = async (req, res) => {
       address,
     } = req.body;
 
+    const isAdminExist = Admin.findOne({ email }).select('-password');
+    const isCollegeExist = College.findOne({ collegeCode })
+    if(isAdminExist || isCollegeExist) {
+      return res.status(400).json({
+        message: "user exist"
+      })
+    }
+    
     console.log("before college creation");
 
     const college = new College({ uniName, collegeName, collegeCode, address });
@@ -44,8 +52,8 @@ exports.signup = async (req, res) => {
     console.log("college updated with principal");
 
 
-    const accessToken = generateAccessToken({ adminId: admin._id, name, email });
-    const refreshToken = generateRefreshToken({ adminId: admin._id, name, email });
+    const accessToken = generateAccessToken({ adminId: admin._id, name, email, role: "admin" });
+    const refreshToken = generateRefreshToken({ adminId: admin._id, name, email, role: "admin" });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -90,8 +98,8 @@ exports.login = async (req, res) => {
 
     if (!admin) {
       return res.status(401).send({
-        error: "invalid email address"
-      })
+        error: "Invalid email address"
+      });
     }
 
     const isMatch = await admin.comparePassword(password);
@@ -102,8 +110,16 @@ exports.login = async (req, res) => {
       });
     }
 
-    const accessToken = generateAccessToken({ adminId: admin._id, name: admin.name, email: admin.email });
-    const refreshToken = generateRefreshToken({ adminId: admin._id, name: admin.name, email: admin.email });
+    // Check if a refresh token already exists for this user
+    const existingRefreshToken = req.cookies.refreshToken;
+    if (existingRefreshToken) {
+      return res.status(400).send({
+        error: "User already logged in. Please refresh your session."
+      });
+    }
+
+    const accessToken = generateAccessToken({ adminId: admin._id, name: admin.name, email: admin.email, role: "admin" });
+    const refreshToken = generateRefreshToken({ adminId: admin._id, name: admin.name, email: admin.email, role: "admin" });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -123,7 +139,7 @@ exports.login = async (req, res) => {
       error: "Internal server error. Please try again later."
     });
   }
-}
+};
 
 exports.logout = (req, res) => {
   res.clearCookie('refreshToken', {
@@ -168,3 +184,27 @@ exports.refreshToken = async (req, res) => {
   }
 };
 
+exports.checkAuthStatus = async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) return res.status(401).send({ error: 'Not authenticated' });
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    res.status(200).json({
+      message: 'User is already logged in',
+      user: {
+        id: decoded.adminId,
+        email: decoded.email,
+        role: decoded.role
+      }
+    });
+    
+  } catch (error) {
+    res.status(403).clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Strict'
+    }).send({ error: 'Invalid refresh token' });
+  }
+};

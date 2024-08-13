@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 
-const auth = async (req, res, next) => {
+// Middleware to check authentication and authorization
+const auth = (roles = []) => async (req, res, next) => {
   try {
     const token = req.cookies.refreshToken;
     if (!token) {
@@ -9,13 +9,14 @@ const auth = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
-    const user = await User.findOne({ _id: decoded.id });
 
-    if (!user) {
-      throw new Error();
+    // Check if user role is allowed
+    if (roles.length && !roles.includes(decoded.role)) {
+      return res.status(403).send({ error: 'Access denied' });
     }
 
-    req.user = user;
+    req.user = decoded; // Attach user info to request
+    req.email = decoded.email
     next();
   } catch (error) {
     res.status(401).send({ error: 'Please authenticate.' });

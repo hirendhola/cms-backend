@@ -15,7 +15,6 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 app.use(cors());
-
 app.use(express.json());
 app.use(cookieParser());
 
@@ -31,9 +30,9 @@ app.get('/', (req, res) => {
 })
 
 //protected route
-app.get('/api/protected', auth, (req, res) => {
-  res.send('This is a protected route');
-});
+// app.get('/api/protected', auth(), (req, res) => {
+//   res.send('This is a protected route');
+// });
 
 // undefined route
 app.use((req, res, next) => {
@@ -41,7 +40,6 @@ app.use((req, res, next) => {
     message: "Oops! Looks like you got lost."
   })
 })
-
 
 // Error handling middleware
 app.use((err, req, res, next) => {

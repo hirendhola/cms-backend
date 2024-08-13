@@ -1,14 +1,14 @@
-const { Admin } = require('../models/Admin')
-const mongoose = require('mongoose')
+const { Admin } = require('../models/Admin');
+const { College } = require('../models/College');
 
 exports.profile = async (req, res) => {
   try {
-    const { email } = req.body;
+    const email = req.email; // Access email from req.user
 
     const admin = await Admin.findOne({ email }).select('-password');
-
+    const college = await College.findOne({ _id: admin.college })
     if (admin) {
-      res.status(200).json(admin);
+      res.status(200).json({ admin, college });
     } else {
       res.status(404).json({ message: 'Admin not found' });
     }

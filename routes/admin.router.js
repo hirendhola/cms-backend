@@ -4,6 +4,6 @@ const { profile } = require('../controllers/admin.controller');
 
 const router = express.Router();
 
-router.get('/me', profile);
+router.get('/me', auth(['admin']), profile);
 
 module.exports = router;
