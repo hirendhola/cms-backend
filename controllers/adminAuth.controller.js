@@ -22,14 +22,15 @@ exports.signup = async (req, res) => {
       address,
     } = req.body;
 
-    const isAdminExist = Admin.findOne({ email }).select('-password');
-    const isCollegeExist = College.findOne({ collegeCode })
-    if(isAdminExist || isCollegeExist) {
+    // Production: Ensure async operations are awaited
+    const isAdminExist = await Admin.findOne({ email }).select('-password');
+    const isCollegeExist = await College.findOne({ collegeCode });
+    if (isAdminExist || isCollegeExist) {
       return res.status(400).json({
-        message: "user exist"
-      })
+        message: "User exists",
+      });
     }
-    
+
     console.log("before college creation");
 
     const college = new College({ uniName, collegeName, collegeCode, address });
@@ -51,21 +52,22 @@ exports.signup = async (req, res) => {
     await college.save({ session });
     console.log("college updated with principal");
 
-
+    // Generate tokens
     const accessToken = generateAccessToken({ adminId: admin._id, name, email, role: "admin" });
     const refreshToken = generateRefreshToken({ adminId: admin._id, name, email, role: "admin" });
 
+    // Production: Set secure, HTTP-only cookie for the refresh token
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'Strict',
+      secure: false,
+      sameSite: 'Lax',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
+    // Commit the transaction
     await session.commitTransaction();
     session.endSession();
     console.log("transaction committed");
-
 
     res.status(201).json({
       message: 'Admin and College created successfully',
@@ -82,16 +84,16 @@ exports.signup = async (req, res) => {
       res.status(400).json({ error: 'Failed to create admin and college. Please try again.' });
     }
 
-    // Only abort the transaction if it hasn't been committed
+    // Production: Abort the transaction only if it hasn't been committed
     if (session.inTransaction()) {
       await session.abortTransaction();
     }
-
-    session.endSession();
+    session.endSession(); // Ensure session is ended even in case of an error
   }
 };
 
-exports.login = async (req, res) => {
+
+exports.signin = async (req, res) => {
   try {
     const { email, password } = req.body;
     const admin = await Admin.findOne({ email });
@@ -110,20 +112,12 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Check if a refresh token already exists for this user
-    const existingRefreshToken = req.cookies.refreshToken;
-    if (existingRefreshToken) {
-      return res.status(400).send({
-        error: "User already logged in. Please refresh your session."
-      });
-    }
-
     const accessToken = generateAccessToken({ adminId: admin._id, name: admin.name, email: admin.email, role: "admin" });
     const refreshToken = generateRefreshToken({ adminId: admin._id, name: admin.name, email: admin.email, role: "admin" });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'Strict',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
@@ -142,10 +136,11 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = (req, res) => {
+  // Production: Clear secure, HTTP-only cookie on logout
   res.clearCookie('refreshToken', {
     httpOnly: true,
-    secure: true,
-    sameSite: 'Strict',
+    secure: false,
+    sameSite: 'Lax',
   });
   res.send({ message: 'Logged out successfully' });
 };
@@ -157,20 +152,19 @@ exports.refreshToken = async (req, res) => {
   try {
     const decoded = jwt.verify(oldRefreshToken, process.env.JWT_REFRESH_SECRET);
 
-    const accessToken = generateAccessToken({ adminId: decoded.adminId });
+    // Generate new tokens
+    const accessToken = generateAccessToken({ adminId: decoded.adminId, name: decoded.name, email: decoded.email, role: "admin" });
+    const newRefreshToken = generateRefreshToken({ adminId: decoded.adminId, name: decoded.name, email: decoded.email, role: "admin" });
 
-    // Option 1: Generate a new refresh token
-    const newRefreshToken = generateRefreshToken({ adminId: decoded.adminId });
-
-    // Set the new refresh token with a renewed expiry time
+    // Production: Set secure, HTTP-only cookie for the new refresh token
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'Strict',
+      secure: false,
+      sameSite: 'Lax',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
-    res.send({ accessToken });
+    res.status(200).send({ accessToken });
   } catch (error) {
     console.error("Refresh token error:", error.message);
     res
@@ -192,14 +186,14 @@ exports.checkAuthStatus = async (req, res) => {
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
     res.status(200).json({
-      message: 'User is already logged in',
+      message: 'User logged in',
       user: {
         id: decoded.adminId,
         email: decoded.email,
         role: decoded.role
       }
     });
-    
+
   } catch (error) {
     res.status(403).clearCookie('refreshToken', {
       httpOnly: true,
@@ -208,3 +202,20 @@ exports.checkAuthStatus = async (req, res) => {
     }).send({ error: 'Invalid refresh token' });
   }
 };
+
+
+exports.verifyToken = async (req, res) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    res.json({ valid: true, adminId: decoded.adminId });
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+};
+

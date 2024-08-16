@@ -3,11 +3,17 @@ const { College } = require('../models/College');
 
 exports.profile = async (req, res) => {
   try {
-    const email = req.email; // Access email from req.user
+    const email = req.email;
 
     const admin = await Admin.findOne({ email }).select('-password');
-    const college = await College.findOne({ _id: admin.college })
     if (admin) {
+      const college = await College.findOne({ _id: admin.college })
+        .populate({
+          path: 'departments',
+          select: 'name code'
+        })
+        .exec();
+
       res.status(200).json({ admin, college });
     } else {
       res.status(404).json({ message: 'Admin not found' });

@@ -25,8 +25,10 @@ exports.createDepartment = async (req, res) => {
       code,
       college: college._id // Use the resolved college's _id
     });
-
     await department.save({ session });
+
+    college.departments.push(department._id);
+    await college.save({ session });
 
     await session.commitTransaction();
     session.endSession();
