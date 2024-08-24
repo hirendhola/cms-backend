@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const { Admin } = require('../models/Admin');
-const { College } = require('../models/College');
-const { generateAccessToken, generateRefreshToken } = require('../helpers/tokenUtils');
+const { Admin } = require('../../models/Admin');
+const { College } = require('../../models/College');
+const { generateAccessToken, generateRefreshToken } = require('../../helpers/tokenUtils');
 
 exports.signup = async (req, res) => {
   const session = await mongoose.startSession();
@@ -118,7 +118,7 @@ exports.signin = async (req, res) => {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Strict',
+      sameSite: 'Lax',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -172,7 +172,7 @@ exports.refreshToken = async (req, res) => {
       .clearCookie('refreshToken', {
         httpOnly: true,
         secure: true,
-        sameSite: 'Strict',
+        sameSite: 'Lax',
       })
       .send({ error: 'Invalid refresh token' });
   }
@@ -198,7 +198,7 @@ exports.checkAuthStatus = async (req, res) => {
     res.status(403).clearCookie('refreshToken', {
       httpOnly: true,
       secure: true,
-      sameSite: 'Strict'
+      sameSite: 'Lax'
     }).send({ error: 'Invalid refresh token' });
   }
 };

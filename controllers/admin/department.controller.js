@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const { Department } = require('../models/Department');
-const { College } = require('../models/College');
+const { Department } = require('../../models/Department');
+const { College } = require('../../models/College');
 
 exports.createDepartment = async (req, res) => {
   const session = await mongoose.startSession();

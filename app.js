@@ -1,11 +1,12 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
-const auth = require('./middleware/auth');
 const connectDB = require('./config/database');
-const adminAuthRoute = require('./routes/adminAuth.router');
-const departmentRoute = require('./routes/department.router')
-const adminRoute = require('./routes/admin.router')
+const adminAuthRoute = require('./routes/admin/adminAuth.router');
+const hodAuthRoute = require('./routes/hod/hodAuth.router');
+const departmentRoute = require('./routes/admin/department.router')
+const adminRoute = require('./routes/admin/admin.router')
+const createDepartment = require('./routes/hod/createProgram.router')
 const cors = require('cors');
 
 dotenv.config();
@@ -21,10 +22,24 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Routes
+// Routes 
+
+//admin
 app.use('/api/auth/admin/', adminAuthRoute);
 app.use('/api/admin/department/', departmentRoute);
 app.use('/api/admin/', adminRoute);
+
+//hod
+app.use('/api/auth/hod/', hodAuthRoute)
+app.use('/api/', createDepartment)
+
+//teacher
+
+
+//student
+
+
+
 
 app.get('/', (req, res) => {
   return res.json({

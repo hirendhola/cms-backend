@@ -20,7 +20,7 @@ const passwordHelper = {
       }
     });
 
-    schema.pre('save', async function(next) {
+    schema.pre('save', async function (next) {
       if (!this.isModified('password')) {
         return next();
       }
@@ -28,7 +28,7 @@ const passwordHelper = {
       next();
     });
 
-    schema.methods.comparePassword = async function(candidatePassword) {
+    schema.methods.comparePassword = async function (candidatePassword) {
       return passwordHelper.comparePassword(candidatePassword, this.password);
     };
   }

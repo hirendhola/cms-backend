@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const passwordHelper = require('../helpers/passwordHelper');
 
 const HODSchema = new mongoose.Schema({
   name: {
@@ -30,7 +31,7 @@ const HODSchema = new mongoose.Schema({
   }
 });
 
-passwordHelper.addPasswordFieldToSchema(AdminSchema);
+passwordHelper.addPasswordFieldToSchema(HODSchema);
 
 const HOD = mongoose.model('HOD', HODSchema);
 

@@ -1,5 +1,5 @@
-const { Admin } = require('../models/Admin');
-const { College } = require('../models/College');
+const { Admin } = require('../../models/Admin');
+const { College } = require('../../models/College');
 
 exports.profile = async (req, res) => {
   try {
@@ -23,3 +23,4 @@ exports.profile = async (req, res) => {
     res.status(500).json({ message: 'An error occurred while fetching the profile' });
   }
 };
+
