@@ -36,7 +36,7 @@ const TeacherSchema = new mongoose.Schema({
   subjects: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Subject'
-  }]
+  }]  
 });
 
 passwordHelper.addPasswordFieldToSchema(AdminSchema);

@@ -12,18 +12,16 @@ exports.createDepartment = async (req, res) => {
 
     const { name, code, collegeCode } = req.body;
 
-    // Await the findOne call to resolve the Promise
     const college = await College.findOne({ collegeCode });
 
     if (!college) {
-      // Handle case where college is not found
       throw new Error(`College with code "${collegeCode}" not found.`);
     }
 
     const department = new Department({
       name,
       code,
-      college: college._id // Use the resolved college's _id
+      college: college._id 
     });
     await department.save({ session });
 
@@ -50,7 +48,6 @@ exports.createDepartment = async (req, res) => {
       res.status(400).json({ error: 'Failed to create Department. Please try again.' });
     }
 
-    // Only abort the transaction if it hasn't been committed
     if (session.inTransaction()) {
       await session.abortTransaction();
     }

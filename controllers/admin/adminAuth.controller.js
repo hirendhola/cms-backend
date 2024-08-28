@@ -99,16 +99,16 @@ exports.signin = async (req, res) => {
     const admin = await Admin.findOne({ email });
 
     if (!admin) {
-      return res.status(401).send({
-        error: "Invalid email address"
+      return res.status(401).json({
+        message: "Invalid email address",
       });
     }
 
     const isMatch = await admin.comparePassword(password);
 
     if (!isMatch) {
-      return res.status(401).send({
-        error: "Invalid password"
+      return res.status(401).json({
+        message: "Invalid password",
       });
     }
 

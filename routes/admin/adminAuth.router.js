@@ -6,8 +6,8 @@ const { signup, signin, logout, refreshToken, checkAuthStatus, verifyToken } = r
 const router = express.Router();
 
 router.post('/signup', signup);
-router.post('/signin', authLimiter, signin);
-router.post('/refreshtoken', refreshTokenLimiter, refreshToken);
+router.post('/signin', signin);
+router.post('/refreshtoken', refreshToken);
 router.post('/logout', auth(['admin']), logout);
 router.get('/check-auth-status', auth(['admin']), checkAuthStatus);
 router.get('/verify-token', verifyToken);

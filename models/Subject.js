@@ -10,6 +10,10 @@ const SubjectSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  semester: {
+    type: String,
+    required: true,
+  },
   course: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course',

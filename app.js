@@ -6,7 +6,7 @@ const adminAuthRoute = require('./routes/admin/adminAuth.router');
 const hodAuthRoute = require('./routes/hod/hodAuth.router');
 const departmentRoute = require('./routes/admin/department.router')
 const adminRoute = require('./routes/admin/admin.router')
-const createDepartment = require('./routes/hod/createProgram.router')
+const hodRoute = require('./routes/hod/hod.router')
 const cors = require('cors');
 
 dotenv.config();
@@ -31,7 +31,7 @@ app.use('/api/admin/', adminRoute);
 
 //hod
 app.use('/api/auth/hod/', hodAuthRoute)
-app.use('/api/', createDepartment)
+app.use('/api/hod', hodRoute)
 
 //teacher
 

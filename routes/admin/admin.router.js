@@ -7,4 +7,5 @@ const router = express.Router();
 
 router.get('/me', auth(['admin']), profile);
 router.get('/generate-access-token/:department', generateCode)
+
 module.exports = router;
