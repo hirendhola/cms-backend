@@ -16,7 +16,7 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 app.use(cors({
-  origin: process.env.ORIGIN,
+  origin: "https://cms-frontend-omega-amber.vercel.app",
   credentials: true
 }));
 app.use(express.json());
