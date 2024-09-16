@@ -13,11 +13,12 @@ dotenv.config();
 
 const app = express();
 
-// Connect to MongoDB
+// Connect to MongoDB 
 connectDB();
 app.use(cors({
-  origin: "https://cms-frontend-omega-amber.vercel.app",
+  origin: 'http://localhost:5173',
   credentials: true
+
 }));
 app.use(express.json());
 app.use(cookieParser());
@@ -47,12 +48,7 @@ app.get('/', (req, res) => {
   })
 })
 
-//protected route
-// app.get('/api/protected', auth(), (req, res) => {
-//   res.send('This is a protected route');
-// });
 
-// undefined route
 app.use((req, res, next) => {
   res.status(404).send({
     message: "Oops! Looks like you got lost."

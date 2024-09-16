@@ -22,6 +22,7 @@ const mongoose = require('mongoose');
 const { generateAccessToken, generateRefreshToken } = require('../../helpers/tokenUtils');
 const { HOD } = require('../../models/HOD');
 const { HodAccessCode } = require('../../models/AccessCodes');
+const { Department } = require('../../models/Department')
 
 exports.signup = async (req, res) => {
   const session = await mongoose.startSession();
@@ -40,16 +41,21 @@ exports.signup = async (req, res) => {
       error: "Wrong Access Code"
     })
 
+    const department = await Department.findOne({ _id: isAccessCodeExist.department })
+
     const hod = new HOD({
       name,
       email,
       mobileNumber,
       password,
       accessCode,
-      department: isAccessCodeExist.department
+      department: department._id
     });
 
     await hod.save({ session });
+
+    department.hod = hod._id;
+    department.save({ session })
 
     // Generate tokens
     const accessToken = generateAccessToken({ hodId: hod._id, name, email, role: "hod" });
@@ -58,8 +64,8 @@ exports.signup = async (req, res) => {
     // Production: Set secure, HTTP-only cookie for the refresh token
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: 'Lax',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.MODE === 'production' ? 'Strict' : 'Lax',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -106,8 +112,8 @@ exports.signin = async (req, res) => {
     // Production: Set secure, HTTP-only cookie for the refresh token
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: 'Lax',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.MODE === 'production' ? 'Strict' : 'Lax',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -127,8 +133,8 @@ exports.signin = async (req, res) => {
 exports.logout = (req, res) => {
   res.clearCookie('refreshToken', {
     httpOnly: true,
-    secure: false,  
-    sameSite: 'Lax',
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.MODE === 'production' ? 'Strict' : 'Lax',
   });
 
   res.removeHeader('Authorization');
@@ -150,8 +156,8 @@ exports.refreshToken = async (req, res) => {
     // Production: Set secure, HTTP-only cookie for the new refresh token
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: 'Lax',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.MODE === 'production' ? 'Strict' : 'Lax',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -162,8 +168,8 @@ exports.refreshToken = async (req, res) => {
       .status(403)
       .clearCookie('refreshToken', {
         httpOnly: true,
-        secure: true,
-        sameSite: 'Lax',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.MODE === 'production' ? 'Strict' : 'Lax',
       })
       .send({ error: 'Invalid refresh token' });
   }

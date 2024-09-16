@@ -10,7 +10,6 @@ exports.profile = async (req, res) => {
       const college = await College.findOne({ _id: admin.college })
         .populate({
           path: 'departments',
-          select: 'name code'
         })
         .exec();
 
